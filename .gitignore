@@ -1,0 +1,15 @@
+# node modules
+node_modules/
+
+# .env file for sensitive credentials
+.env
+
+# ignore the png files, they will need to be hosted and downloaded from elsewhere since github wont allow that large amount of files
+files/
+files/*
+
+# logs
+*.log
+
+# npm package-lock
+package-lock.json
