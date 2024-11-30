@@ -16,5 +16,9 @@ npm i
 BOT_TOKEN=
 reservoir_api=
 
+### unzip files.zip into a directory called files/
+### this directory contains all sproto pngs
+### so it will be pretty big and cant be hosted on github (separate download link will be provided)
+
 ## running the script
 node index.js

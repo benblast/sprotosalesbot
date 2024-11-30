@@ -4,9 +4,12 @@ node_modules/
 # .env file for sensitive credentials
 .env
 
+# ignore the db
+chat-ids/*
+# beep the directory itself (ensure it's not ignored by the git gods)
+!chat-ids/
 # ignore the png files, they will need to be hosted and downloaded from elsewhere since github wont allow that large amount of files
 files/
-files/*
 
 # logs
 *.log

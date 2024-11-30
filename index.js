@@ -4,12 +4,13 @@ import fs from 'fs'
 import path from 'path'
 import { getNFTSales } from './salesChecker.js'
 import pkg from 'node-persist'
+import axios from 'axios'
 const { init, getItem, setItem, values } = pkg
 // start the fuckin node-persist storage
 await init({ dir: './chat-ids' })
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
-const checkIntervalInMs = 300000 //30k milliseconds, 5minutes
+const checkIntervalInMs = 300000 //300k milliseconds, 5minutes
 
 
 bot.command('getchatid', (ctx) => {
@@ -33,11 +34,10 @@ bot.command('addsprotobot', async (ctx) => {
             ctx.reply(`chat id ${currentChatId} has been successfully added for sproto gremlin sales bot action extravaganza!`)
             console.log(`added chat ID: ${currentChatId}`, chatIds)
         } else {
-            ctx.reply(`this chat id ${currentChatId} is already in the list.`)
+            console.log(`this chat id ${currentChatId} is already in the list.`)
         }
     } catch(e) {
         console.log(e, 'THIS IS THE ERROR TO GIVE TO OLDMAN')
-        ctx.reply('uhh smth went wrong')
     }
 })
 
@@ -59,11 +59,10 @@ bot.command('removesprotobot', async (ctx) => {
             ctx.reply(`chat id ${currentChatId} has been successfully removed from the list.`)
             console.log(`removed chat id: ${currentChatId}`, chatIds)
         } else {
-            ctx.reply(`chat id ${currentChatId} was not found in the list.`)
+            console.log(`chat id ${currentChatId} was not found in the list.`)
         }
     } catch (e) {
-        console.log(e, 'Error while removing chat ID')
-        ctx.reply('Something went wrong!')
+        console.log(e, 'error while removing chat id')
     }
 })
 
@@ -71,22 +70,33 @@ bot.command('removesprotobot', async (ctx) => {
 async function checkAndNotify() {
     console.log('checking')
   const sales = await getNFTSales()
+  if(sales.length < 1) return console.log(`no sales in the last ${checkIntervalInMs/1000}seconds`)
   if(!sales) return console.log('smth went wrong fetching sales...')
   for (let i = 0; i < sales.length; i++) {
     const tokenId = sales[i].token.tokenId
     const transactionHash = sales[i].txHash
     const ethPrice = sales[i].price.amount.decimal
-    const usdPrice = sales[i].price.netAmount.usd
+    let usdPrice
+    if(!sales[i].price.netAmount.usd) {
+        let price = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
+        if(price.ethereum.usd) {
+            usdPrice = (parseInt(price.ethereum.usd)*parseInt(ethPrice))
+        } else {
+            usdPrice = "unknown"
+        }
+    } else {
+        usdPrice = sales[i].price.netAmount.usd
+    }
     const formattedUsdPrice = new Intl.NumberFormat('en-US', {
         style: 'currency',
         currency: 'USD',
         minimumFractionDigits: 2,
         maximumFractionDigits: 2,
-    }).format(usdPrice);
+    }).format(usdPrice)
 
     // start building a message variable
     const message = `
-      💎 Sproto Gremlin #${tokenId} has been adopted for <b>${ethPrice} ETH</b> ($${formattedUsdPrice})
+      💎 Sproto Gremlin #${tokenId} has been adopted for <b>${ethPrice} ETH</b> (${formattedUsdPrice})
       \nhttps://magiceden.io/item-details/ethereum/0xeeca64ea9fcf99a22806cd99b3d29cf6e8d54925/${tokenId}
     `
 
