@@ -77,7 +77,7 @@ async function checkAndNotify() {
     const transactionHash = sales[i].txHash
     const ethPrice = sales[i].price.amount.decimal
     let usdPrice
-    if(!sales[i].price.netAmount.usd) {
+    if(!sales[i]?.price?.netAmount?.usd) {
         let price = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
         if(price.ethereum.usd) {
             usdPrice = (parseInt(price.ethereum.usd)*parseInt(ethPrice))
