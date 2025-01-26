@@ -79,7 +79,7 @@ async function checkAndNotify() {
     let usdPrice
     if(!sales[i]?.price?.netAmount?.usd) {
         let price = await axios.get('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd')
-        if(price.ethereum.usd) {
+        if(price?.ethereum?.usd) {
             usdPrice = (parseInt(price.ethereum.usd)*parseInt(ethPrice))
         } else {
             usdPrice = "unknown"
